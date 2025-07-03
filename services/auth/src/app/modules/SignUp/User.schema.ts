@@ -17,9 +17,16 @@ const loginUserSchema = z.object({
         email: z.string().email(),
         password: z.string().min(6).max(255)
     })
+});
+
+const verifyingAccountDTO = z.object({
+    body: z.object({
+        code: z.string()
+    })
 })
 
 export const UserSchema = {
     singUpUserSchema,
-    loginUserSchema
+    loginUserSchema,
+    verifyingAccountDTO
 }

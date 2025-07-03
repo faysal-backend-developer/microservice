@@ -4,6 +4,8 @@ import bcrypt from 'bcrypt'
 import { config } from "../../../config";
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { LoginHistoryService } from "../LoginHistory/LoginHistory.service";
+import { generateCode, getAccountActivatedEmailHTML, getVerificationEmailHTML } from "../../helpers/utils";
+import axios from "axios";
 
 const signupUser = async (payload: User): Promise<Partial<User>> => {
 
@@ -30,7 +32,42 @@ const signupUser = async (payload: User): Promise<Partial<User>> => {
             name: true,
             role: true,
             status: true,
-            verified: true
+            verified: true,
+            id: true
+        }
+    })
+
+    const code = generateCode();
+
+    try {
+        const emailURL = `${config.email_url}email/`
+        await axios.post(emailURL, {
+            recipient: newUser.email,
+            subject: "Welcome! Here’s Your Account Verification Code",
+            body: getVerificationEmailHTML(newUser?.name || "Anonymous", code),
+            source: "Account Activation"
+        })
+
+        const userURL = `${config.user_url}user/`
+        await axios.post(userURL, {
+            authUserId: newUser?.id,
+            email: newUser?.email,
+            name: newUser?.name
+        })
+    } catch (error) {
+        console.log(error, "Axios Error")
+    }
+
+
+
+
+
+    await prisma.verificationCode.create({
+        data: {
+            userId: newUser?.id,
+            code,
+            expireAt: new Date(Date.now() + 2 * 60 * 60 * 1000)
+
         }
     })
 
@@ -39,8 +76,9 @@ const signupUser = async (payload: User): Promise<Partial<User>> => {
 
 };
 
-// TODO : generate Verification Code 
-// TODO : Send Verification Email 
+// *NOTE: Generate Code 
+// *NOTE: Sent Email --> Save Code --> Save Email
+
 
 // *NOTE : LoginHistory 
 
@@ -117,7 +155,7 @@ const loginUser = async (payload: Partial<User>, ipAddress: string, userAgent: s
 }
 
 
-// *NOTE - Verified Token
+// *NOTE - Verified Token for login User and Password Matching 
 
 const verifiedToken = async (accessToken: string): Promise<Partial<User | null>> => {
     const decoded = jwt.verify(accessToken, config.jwt_secret as string);
@@ -137,6 +175,83 @@ const verifiedToken = async (accessToken: string): Promise<Partial<User | null>>
 
 
     return user;
+};
+
+
+
+// TODO: Account Verifying using OTP Code > http://localhost:4004/verifying/email 
+const verifyingAccount = async (code: string, email: string) => {
+    const existingUser = await prisma.user.findUnique({
+        where: {
+            email
+        }
+    })
+
+    if (!existingUser) {
+        throw new Error("User Not Founded")
+    };
+
+    const verifiedUser = await prisma.verificationCode.findUnique({
+        where: {
+            userId_code: {
+                userId: existingUser?.id,
+                code
+            }
+        }
+    });
+
+    if (!verifiedUser) {
+        throw new Error("Invalid verification code");
+    }
+
+
+    const now = new Date();
+    if (verifiedUser.expireAt < now) {
+        throw new Error("Verification code has expired");
+    }
+
+    await prisma.verificationCode.update({
+        where: {
+            id: verifiedUser?.id
+        },
+        data: {
+            status: "USED",
+            verifiedAt: now
+        }
+    })
+
+
+    await prisma.user.update({
+        where: {
+            id: existingUser?.id
+        },
+        data: {
+            verified: true,
+            status: "ACTIVE"
+        }
+    })
+
+
+    try {
+        const emailURL = `${config.email_url}email/`
+        await axios.post(emailURL, {
+            recipient: existingUser?.email,
+            subject: "Welcome Aboard! Your Account Has Been Verified",
+            body: getAccountActivatedEmailHTML(existingUser?.name),
+            source: "Account Activate"
+        })
+    } catch (error) {
+        console.log(error, "Axios Error")
+    }
+
+
+
+    return {
+        message: "Account Verified Successful"
+    }
+
+
+
 }
 
 
@@ -144,5 +259,6 @@ const verifiedToken = async (accessToken: string): Promise<Partial<User | null>>
 export const UserService = {
     signupUser,
     loginUser,
-    verifiedToken
+    verifiedToken,
+    verifyingAccount
 }

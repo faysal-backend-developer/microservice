@@ -39,8 +39,9 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 
 
 const verifiedToken = catchAsync(async (req: Request, res: Response) => {
-    const accessToken = req.headers.accessToken as string;
-    const result = await UserService.verifiedToken(accessToken);
+    const authorization = req.headers.authorization as string;
+
+    const result = await UserService.verifiedToken(authorization);
 
     sendResponse<Partial<User> | null>(res, {
         statusCode: 200,
@@ -48,10 +49,25 @@ const verifiedToken = catchAsync(async (req: Request, res: Response) => {
         message: "Authorized",
         data: result
     })
+});
+
+
+const verifyingAccount = catchAsync(async (req: Request, res: Response) => {
+    const email = req.headers.email as string;
+    const { code } = req.body;
+    const result = await UserService.verifyingAccount(code, email);
+
+    sendResponse(res, {
+        statusCode: 201,
+        success: true,
+        message: "Account Verify Successful",
+        data: result
+    })
 })
 
 export const UserController = {
     signUpUser,
     loginUser,
-    verifiedToken
+    verifiedToken,
+    verifyingAccount
 }

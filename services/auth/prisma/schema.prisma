@@ -80,5 +80,6 @@ model VerificationCode {
   expireAt   DateTime
   verifiedAt DateTime?
 
+  @@unique([userId, code])
   @@map("verification_codes")
 }

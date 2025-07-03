@@ -11,5 +11,7 @@ export const config = {
     user_url: process.env.USER_URL || "http://localhost:4003/" || "http://127.0.0.1:4003",
     salt_round: process.env.SALT_ROUND,
     jwt_secret: process.env.JWT_TOKEN_SECRET,
-    jwt_expireIn: process.env.JWT_EXPIRE_IN || "30d"
+    jwt_expireIn: process.env.JWT_EXPIRE_IN || "30d",
+    email_url: process.env.EMAIL_URL || "http://localhost:4005/",
+    default_mail: process.env.DEFAULT_MAIL
 };
