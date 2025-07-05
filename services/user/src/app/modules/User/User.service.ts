@@ -35,10 +35,15 @@ const findUserById = async (id: string, field: TField): Promise<User | null> => 
 
     let whereClause: { id: string } | { authUserId: string };
 
+
+
     if (field === 'id') {
         whereClause = { id };
+
+        console.log(whereClause)
     } else {
         whereClause = { authUserId: id };
+
     }
     const user = await prisma.user.findUnique({
         where: whereClause

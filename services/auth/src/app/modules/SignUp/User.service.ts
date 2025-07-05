@@ -181,6 +181,11 @@ const verifiedToken = async (accessToken: string): Promise<Partial<User | null>>
 
 // TODO: Account Verifying using OTP Code > http://localhost:4004/verifying/email 
 const verifyingAccount = async (code: string, email: string) => {
+
+    // if (!email) {
+    //     console.log(email)
+    //     throw new Error("Email Must by provided")
+    // }
     const existingUser = await prisma.user.findUnique({
         where: {
             email

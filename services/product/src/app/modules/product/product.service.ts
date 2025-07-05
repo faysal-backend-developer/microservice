@@ -24,9 +24,11 @@ const createProduct = async (product: Product): Promise<Product> => {
         data: product
     })
 
+
+
     let inventory;
     try {
-        const { data } = await axios.post(`${config.inventory_service_url}/api/v1/inventory/`, {
+        const { data } = await axios.post(`${config.inventory_service_url}/inventory/`, {
             productId: newProduct.id,
             sku: newProduct.sku
         })

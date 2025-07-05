@@ -5,11 +5,18 @@
             "routes" : [
                 {
                     "path": "/product",
-                    "methods": ["post", "get"]
+                    "methods": ["post"],
+                    "middlewares": ["auth"]
+                },
+                {
+                    "path": "/product",
+                    "methods": ["get"],
+                    "middlewares":[]
                 },
                 {
                     "path": "/product/:id",
-                    "methods": ["get"]
+                    "methods": ["get"],
+                    "middlewares":["auth"]
                 }
             ]
             
@@ -19,15 +26,58 @@
             "routes" : [
                 {
                     "path": "/inventory/:id",
-                    "methods": ["patch"]
+                    "methods": ["patch"],
+                    "middlewares": ["auth"]
                 },
                 {
                     "path" : "/inventory/:id/details",
-                    "methods": ["get"]
+                    "methods": ["get"],
+                    "middlewares": ["auth"]
                 },
                 {
                     "path": "/inventory",
-                    "methods": ["get"]
+                    "methods": ["get"],
+                    "middlewares":["auth"]
+                }
+            ]
+        },
+        "auth": {
+            "url": "http://localhost:4004",
+            "routes": [
+                {
+                    "path": "/user/signup",
+                    "methods": ["post"],
+                    "middlewares": []
+                },
+                {
+                    "path":"/user/login",
+                    "methods": ["post"],
+                    "middlewares": []
+                },
+                {
+                    "path":"/user/verified",
+                    "methods":["post"],
+                    "middlewares": []
+                },
+                {
+                    "path":"/user/verifying_account",
+                    "methods": ["post"],
+                    "middlewares": []
+                }
+            ]
+        },
+        "user":{
+            "url":"http://localhost:4003",
+            "routes": [
+                {
+                    "path":"/user",
+                    "methods":["post", "get"],
+                    "middlewares": ["auth"]
+                },
+                {
+                    "path":"/user/:id",
+                    "methods":["get","patch","delete"],
+                    "middlewares": ["auth"]
                 }
             ]
         }

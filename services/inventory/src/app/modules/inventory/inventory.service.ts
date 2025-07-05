@@ -70,7 +70,6 @@ const updateInventory = async (id: string, inventory: Partial<updateInventory>):
         const existingInventory = await tx.inventory.findUnique({
             where: { id }
         });
-
         if (!existingInventory) {
             throw new Error("Inventory not found");
         }

@@ -21,17 +21,17 @@ app.get("/health", (_req, res) => {
     res.status(200).json({ status: "UP" });
 })
 
-app.use((req, res, next) => {
-    const allowedOrigins = ["http://localhost:8080", "http://127.0.0.1:8080"];
-    const origin = req.headers.origin || "";
+// app.use((req, res, next) => {
+//     const allowedOrigins = ["http://localhost:8080", "http://127.0.0.1:8080"];
+//     const origin = req.headers.origin || "";
 
-    if(allowedOrigins.includes(origin)) {
-        res.setHeader("Access-Control-Allow-Origin", origin);
-        next();
-    }else{
-        res.status(403).json({ error: "Forbidden" });
-    }
-})
+//     if(allowedOrigins.includes(origin)) {
+//         res.setHeader("Access-Control-Allow-Origin", origin);
+//         next();
+//     }else{
+//         res.status(403).json({ error: "Forbidden" });
+//     }
+// })
 
 app.use("/", appRouter);
 // 404 handler
